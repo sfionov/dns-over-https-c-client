@@ -1,0 +1,139 @@
+commit 6e744662310498e97278f46ccbaf6b68a2f2ad6e (HEAD, tag: v1.31.0, origin/master, origin/HEAD, master)
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2018-02-27
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2018-02-27
+
+    Update bash_completion
+
+commit 478eac099f08c1f6f59ece5d7d318cc1301d698c
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2018-02-27
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2018-02-27
+
+    Update manual pages
+
+commit 88e2029e37794f5c6969032aaef3b200975a3bac
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2018-02-27
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2018-02-27
+
+    Bump up version number to 1.31.0, LT revision to 30:0:16
+
+commit 45d76cf5014fa2cb6d70646861a7a022967d0912
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2018-02-26
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2018-02-26
+
+    nghttpx: Close listening socket on graceful shutdown
+
+commit 54573f28a8eb48719422a559a41836be14491e80
+Merge: 5eac3c90 17793e99
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2018-02-25
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2018-02-25
+
+    Merge pull request #1137 from nghttp2/session-set-user-data
+    
+    Add nghttp2_session_set_user_data() public API function
+
+commit 17793e99dc07accde9352dbf02fe8deb969a6e45
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2018-02-22
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2018-02-22
+
+    Add nghttp2_session_set_user_data() public API function
+
+commit 5eac3c902525a9e515525822d0bb3cfc8f643e17
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2018-02-22
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2018-02-22
+
+    Update manual pages
+
+commit e70195ae912e96e9f1f3d591be2ec7c6ccd4a352
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2018-02-22
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2018-02-22
+
+    nghttpx: Update doc
+
+commit fe51e7fa1ab0c49fb5cd483f954807d3117e9f16
+Merge: 39f0ce7c eb951c2c
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2018-02-17
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2018-02-17
+
+    Merge pull request #1130 from nghttp2/avoid-inet_pton-macro
+    
+    src: Define nghttp2_inet_pton wrapper to avoid inet_pton macro
+
+commit eb951c2ce47973ff030b6fed4cb984ca30cf9a17
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2018-02-12
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2018-02-12
+
+    src: Define nghttp2_inet_pton wrapper to avoid inet_pton macro
+
+commit 39f0ce7c2588ff79544175643bd4d6abe86bbc3a
+Merge: 65157811 e8af7afc
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2018-02-10
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2018-02-10
+
+    Merge pull request #1126 from nghttp2/nghttpx-expired-client-cert
+    
+    nghttpx: Add an option to accept expired client certificate
+
+commit 65157811d47941d45c219c7219af638ee28ca4a2
+Merge: ff3edc09 38abfd18
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2018-02-10
+Commit:     GitHub <noreply@github.com>
+CommitDate: 2018-02-10
+
+    Merge pull request #1123 from nghttp2/mruby-client-cert-not-before-after
+    
+    nghttpx: Add mruby tls_client_not_before, and tls_client_not_after
+
+commit e8af7afc65209cb3c238d9ba3247a7f22737645c
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2018-02-08
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2018-02-08
+
+    nghttpx: Add an option to accept expired client certificate
+
+commit 38abfd1863449107a26c3b1ef1004f624702348f
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2018-02-03
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2018-02-08
+
+    nghttpx: Add mruby tls_client_not_before, and tls_client_not_after
+
+commit ff3edc09ed3c891a12a0752344224fedc31e6f4c
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2018-02-03
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2018-02-03
+
+    nghttpx: Fix potential memory leak
+
+commit 0bb1540682f7b3f0a4fde2b4036bca8b82217949
+Author:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+AuthorDate: 2018-02-02
+Commit:     Tatsuhiro Tsujikawa <tatsuhiro.t@gmail.com>
+CommitDate: 2018-02-02
+
+    Bump up version number to 1.31.0-DEV
