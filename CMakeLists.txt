@@ -22,7 +22,14 @@ target_compile_options(mbedcrypto PRIVATE )
 #target_compile_options(mbedtls PRIVATE -flto -ffat-lto-objects -fvisibility=hidden)
 #target_compile_options(nghttp2_static PRIVATE -flto -ffat-lto-objects -fvisibility=hidden)
 
-add_executable(dns_over_https_client main.c dns.h doh_client.c doh_client.h)
+add_executable(dns_over_https_client
+        main.c
+        dns.h
+        client.c
+        client.h
+        logger.c
+        logger.h http2.c http2.h tls.c tls.h request.c request.h util.c util.h)
+
 target_link_libraries(dns_over_https_client mbedtls nghttp2_static)
 #target_compile_options(dns_over_https_client PRIVATE -flto -ffat-lto-objects -fvisibility=hidden)
 #set_property(TARGET dns_over_https_client PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
