@@ -11,6 +11,7 @@
 #include <mbedtls/ssl.h>
 #include <mbedtls/entropy.h>
 #include <mbedtls/ctr_drbg.h>
+#include "stamp.h"
 
 typedef ssize_t (*send_reply_fn)(void *arg, const void *msg, size_t msglen, const struct sockaddr *sa, socklen_t salen);
 
@@ -26,12 +27,13 @@ typedef struct {
     short events;
     nghttp2_session *session;
     doh_request_t *deferred_req;
+    dns_stamp_t *dns_stamp;
 
     send_reply_fn send_reply;
     void *send_reply_arg;
 } doh_client_t;
 
-int doh_client_init(doh_client_t *client, send_reply_fn send, void *arg);
+int doh_client_init(doh_client_t *client, dns_stamp_t *dns_stamp, send_reply_fn send, void *arg);
 void doh_client_connect(doh_client_t *client);
 void doh_client_reset_session(doh_client_t *client);
 void doh_client_deinit(doh_client_t *cctx);

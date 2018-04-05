@@ -8,6 +8,7 @@
 #include "tls.h"
 #include "logger.h"
 #include "util.h"
+#include "stamp.h"
 #include <unistd.h>
 #include <sys/poll.h>
 #include <errno.h>
@@ -41,13 +42,15 @@ static int doh_client_recv_impl(void *ctx, unsigned char *buf, size_t len) {
 
 }
 
-int doh_client_init(doh_client_t *client, send_reply_fn send, void *arg) {
+int doh_client_init(doh_client_t *client, dns_stamp_t *dns_stamp, send_reply_fn send, void *arg) {
+    memset(client, 0, sizeof(*client));
     client->fd = -1;
     client->ssl_connected = 0;
     client->session = NULL;
     client->events = POLLIN;
     client->send_reply = send;
     client->send_reply_arg = arg;
+    client->dns_stamp = dns_stamp;
     return doh_tls_init(client);
 }
 

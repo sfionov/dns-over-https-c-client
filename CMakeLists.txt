@@ -28,7 +28,7 @@ add_executable(dns_over_https_client
         client.c
         client.h
         logger.c
-        logger.h http2.c http2.h tls.c tls.h request.c request.h util.c util.h)
+        logger.h http2.c http2.h tls.c tls.h request.c request.h util.c util.h stamp.c stamp.h)
 
 target_link_libraries(dns_over_https_client mbedtls nghttp2_static)
 #target_compile_options(dns_over_https_client PRIVATE -flto -ffat-lto-objects -fvisibility=hidden)

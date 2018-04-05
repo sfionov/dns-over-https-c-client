@@ -23,6 +23,7 @@
 #include "request.h"
 #include "util.h"
 #include "tls.h"
+#include "stamp.h"
 
 static const int MAXD_GRAM_SIZE = 65535;
 
@@ -31,6 +32,9 @@ static const int MAXD_GRAM_SIZE = 65535;
 #define PH_STATUS ":status"
 
 int stopping = 0;
+
+struct addrinfo *listen_addr;
+dns_stamp_t *dns_stamp;
 
 ssize_t raw_send(void *arg, const void *msg, size_t msglen, const struct sockaddr *sa, socklen_t salen) {
     return sendto(*(int *)arg, msg, msglen, 0, sa, salen);
@@ -90,12 +94,11 @@ doh_request_t *read_request(int server_fd, doh_client_t *client) {
 }
 
 void do_work(void *arg) {
-    struct addrinfo *listen_addr = arg;
     doh_client_t client;
     int server_fd;
 
     init_listen_socket(&server_fd, listen_addr);
-    if (doh_client_init(&client, raw_send, &server_fd) == -1) {
+    if (doh_client_init(&client, dns_stamp, raw_send, &server_fd) == -1) {
         loginfo("Error initializing DNS over HTTPS client");
         return;
     }
@@ -136,11 +139,11 @@ void do_work(void *arg) {
 }
 
 void usage() {
-    fprintf(stderr, "DNS over HTTPS client");
-    fprintf(stderr, "Only HTTP/2+POST+udp-wireformat supported");
-    fprintf(stderr, "Usage: ./dns-over-https-client <listen port>");
-    fprintf(stderr, "   or: ./dns-over-https-client <listen host> <listen port>");
-    fprintf(stderr, "       default listen host is `::'");
+    fprintf(stderr, "DNS over HTTPS client\n");
+    fprintf(stderr, "Only HTTP/2+POST+udp-wireformat supported\n");
+    fprintf(stderr, "Usage: ./dns-over-https-client <listen port> <sdns:// stamp>\n");
+    fprintf(stderr, "   or: ./dns-over-https-client <listen host> <listen port> <sdns:// stamp>\n");
+    fprintf(stderr, "       default listen host is `::'\n");
 }
 
 struct addrinfo *get_listen_addr(const char *host, const char *serv) {
@@ -158,29 +161,34 @@ struct addrinfo *get_listen_addr(const char *host, const char *serv) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc > 3 || argc == 1) {
+    if (argc < 3 || argc > 4) {
         usage();
         return 1;
     }
 
     signal(SIGPIPE, SIG_IGN);
 
-    const char *host, *serv;
-    if (argc == 3) {
+    const char *host, *serv, *stamp;
+    if (argc == 4) {
         host = argv[1];
         serv = argv[2];
+        stamp = argv[3];
     } else {
         host = "::";
         serv = argv[1];
+        stamp = argv[2];
     }
-    struct addrinfo *result = get_listen_addr(host, serv);
-    if (result == 0) {
+    listen_addr = get_listen_addr(host, serv);
+    if (listen_addr == 0) {
         fatal("Can't resolve listen host");
     }
+    if (dns_stamp_parse(stamp, &dns_stamp) < 0) {
+        fatal("Can't parse DNS stamp");
+    }
 
-    do_work(result);
+    do_work(NULL);
 
-    freeaddrinfo(result);
+    freeaddrinfo(listen_addr);
 
     return 0;
 }
