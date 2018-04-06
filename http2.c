@@ -156,7 +156,10 @@ void doh_http2_init_client(doh_client_t *client) {
     nghttp2_session_callbacks_set_send_callback(callbacks, doh_http2_send_via_tls);
     nghttp2_session_client_new(&client->session, callbacks, client);
     nghttp2_session_callbacks_del(callbacks);
-    nghttp2_submit_settings(client->session, 0, NULL, 0);
+    nghttp2_settings_entry settings[1];
+    settings[0].settings_id = NGHTTP2_SETTINGS_ENABLE_PUSH;
+    settings[0].value = 0;
+    nghttp2_submit_settings(client->session, 0, settings, 1);
     nghttp2_session_send(client->session);
 }
 

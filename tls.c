@@ -2,11 +2,13 @@
 // Created by s.fionov on 05.04.18.
 //
 
+#include <unistd.h>
 #include <mbedtls/entropy.h>
 #include <mbedtls/ctr_drbg.h>
 #include <mbedtls/ssl.h>
 #include <string.h>
 #include <sys/poll.h>
+#include <errno.h>
 #include "tls.h"
 #include "logger.h"
 #include "client.h"
@@ -110,4 +112,38 @@ void doh_tls_deinit(doh_client_t *client) {
     mbedtls_ssl_config_free(&client->conf);
     mbedtls_ctr_drbg_free(&client->ctr_drbg);
     mbedtls_entropy_free(&client->entropy);
+}
+
+static int doh_tls_send_impl(void *ctx, const unsigned char *buf, size_t len) {
+    doh_client_t *cctx = ctx;
+    int w = (int) write(cctx->fd, buf, len);
+    if (w >= 0) {
+        return w;
+    }
+    if (w < 0) {
+        if (errno == EWOULDBLOCK) {
+            return MBEDTLS_ERR_SSL_WANT_WRITE;
+        }
+        return MBEDTLS_ERR_SSL_INTERNAL_ERROR;
+    }
+}
+
+static int doh_tls_recv_impl(void *ctx, unsigned char *buf, size_t len) {
+    doh_client_t *cctx = ctx;
+    int w = (int) read(cctx->fd, buf, len);
+    if (w >= 0) {
+        return w;
+    }
+    if (w < 0) {
+        if (errno == EWOULDBLOCK) {
+            return MBEDTLS_ERR_SSL_WANT_READ;
+        }
+    }
+
+}
+
+void doh_tls_connect(doh_client_t *client) {
+    mbedtls_ssl_setup(&client->ssl, &client->conf);
+    mbedtls_ssl_set_hostname(&client->ssl, client->dns_stamp->hostname);
+    mbedtls_ssl_set_bio(&client->ssl, client, doh_tls_send_impl, doh_tls_recv_impl, NULL);
 }

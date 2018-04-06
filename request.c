@@ -31,8 +31,8 @@ void doh_request_submit(doh_request_t *req) {
 
     http2_add_header(headers, ":method", "POST");
     http2_add_header(headers, ":scheme", "https");
-    http2_add_header(headers, ":authority", "cloudflare-dns.com");
-    http2_add_header(headers, ":path", "/dns-query");
+    http2_add_header(headers, ":authority", req->parent->dns_stamp->hostname);
+    http2_add_header(headers, ":path", req->parent->dns_stamp->path);
     http2_add_header(headers, "accept", "application/dns-udpwireformat");
     http2_add_header(headers, "content-type", "application/dns-udpwireformat");
     http2_add_header(headers, "content-length", "%zd", req->msg.iov_len);
@@ -50,7 +50,8 @@ finish:
 }
 
 void doh_request_send_reply(doh_request_t *req, const uint8_t *data, size_t len) {
-    int r = (int) req->parent->send_reply(req->parent->send_reply_arg, data, len, (const struct sockaddr *) req->sa, req->salen);
+    int r = (int) req->parent->send_reply(req->parent->send_reply_arg, data, len,
+                                          (const struct sockaddr *) req->sa, req->salen);
     if (r < 0) {
         loginfo("Failed to send reply: %s", strerror(errno));
     }
@@ -59,7 +60,8 @@ void doh_request_send_reply(doh_request_t *req, const uint8_t *data, size_t len)
 void doh_request_send_reject(doh_request_t *req) {
     struct dnshdr *hdr = (struct dnshdr *) req->msg.iov_base;
     hdr->flags.rcode = RCODE_SERVFAIL;
-    int r = (int) req->parent->send_reply(req->parent->send_reply_arg, req->msg.iov_base, (size_t) req->msg.iov_len, (const struct sockaddr *) req->sa, req->salen);
+    int r = (int) req->parent->send_reply(req->parent->send_reply_arg, req->msg.iov_base, req->msg.iov_len,
+                                          (const struct sockaddr *) req->sa, req->salen);
     if (r < 0) {
         loginfo("Failed to send reply: %s", strerror(errno));
     }

@@ -9,6 +9,8 @@
 
 int doh_tls_init(doh_client_t *client);
 
+void doh_tls_connect(doh_client_t *client);
+
 void doh_tls_reset_session(doh_client_t *client);
 
 void doh_tls_handshake_io(doh_client_t *client);

@@ -11,6 +11,8 @@ int set_reuse_addr(int fd);
 
 int set_reuse_port(int fd);
 
+int set_tcp_nodelay(int fd);
+
 void fatal(const char *msg);
 
 

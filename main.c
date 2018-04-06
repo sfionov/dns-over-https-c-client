@@ -16,6 +16,7 @@
 #include <mbedtls/debug.h>
 #include <signal.h>
 #include <syscall.h>
+#include <pthread.h>
 #include "dns.h"
 #include "client.h"
 #include "logger.h"
@@ -27,8 +28,6 @@
 
 static const int MAXD_GRAM_SIZE = 65535;
 
-#define CF_IP "1.1.1.1"
-#define CF_PATH "/dns-query"
 #define PH_STATUS ":status"
 
 int stopping = 0;
@@ -63,6 +62,14 @@ void init_listen_socket(int *p_server_fd, struct addrinfo *listen_addr) {
         fatal("Error creating server fd");
     }
 
+    if (set_reuse_addr(server_fd) < 0) {
+        fatal("Error setting reuseaddr flag on server socket");
+    }
+
+    if (set_reuse_port(server_fd) < 0) {
+        fatal("Error setting reuseport flag on server socket");
+    }
+
     if (bind(server_fd, listen_addr->ai_addr, listen_addr->ai_addrlen) != 0) {
         loginfo("Can't bind server socket: %s", strerror(errno));
     }
@@ -71,13 +78,6 @@ void init_listen_socket(int *p_server_fd, struct addrinfo *listen_addr) {
         fatal("Error making server socket non-blocking");
     }
 
-    if (set_reuse_addr(server_fd) < 0) {
-        fatal("Error setting reuseaddr flag on server socket");
-    }
-
-    if (set_reuse_port(server_fd) < 0) {
-        fatal("Error setting reuseport flag on server socket");
-    }
 
     *p_server_fd = server_fd;
 }
@@ -93,14 +93,14 @@ doh_request_t *read_request(int server_fd, doh_client_t *client) {
     doh_request_create(client, buf, r, &sa, salen);
 }
 
-void do_work(void *arg) {
+void *do_work(void *arg) {
     doh_client_t client;
     int server_fd;
 
     init_listen_socket(&server_fd, listen_addr);
     if (doh_client_init(&client, dns_stamp, raw_send, &server_fd) == -1) {
         loginfo("Error initializing DNS over HTTPS client");
-        return;
+        return NULL;
     }
 
     loginfo("Server started");
@@ -136,6 +136,7 @@ void do_work(void *arg) {
     }
 
     doh_client_deinit(&client);
+    return NULL;
 }
 
 void usage() {
@@ -186,7 +187,19 @@ int main(int argc, char *argv[]) {
         fatal("Can't parse DNS stamp");
     }
 
-    do_work(NULL);
+    int threads = 1;
+    loginfo("Spawning %d workers", threads);
+    int thread_idx;
+    for (thread_idx = 0; thread_idx < threads - 1; thread_idx++) {
+        pthread_t thr;
+        pthread_create(&thr, NULL, do_work, NULL);
+        pthread_detach(thr);
+    }
+    if (thread_idx < threads) {
+        do_work(NULL);
+    } else {
+        loginfo("Nothing to do, exiting");
+    }
 
     freeaddrinfo(listen_addr);
 

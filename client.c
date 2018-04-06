@@ -14,34 +14,6 @@
 #include <errno.h>
 #include <memory.h>
 
-static int doh_client_send_impl(void *ctx, const unsigned char *buf, size_t len) {
-    doh_client_t *cctx = ctx;
-    int w = (int) write(cctx->fd, buf, len);
-    if (w >= 0) {
-        return w;
-    }
-    if (w < 0) {
-        if (errno == EWOULDBLOCK) {
-            return MBEDTLS_ERR_SSL_WANT_WRITE;
-        }
-        return MBEDTLS_ERR_SSL_INTERNAL_ERROR;
-    }
-}
-
-static int doh_client_recv_impl(void *ctx, unsigned char *buf, size_t len) {
-    doh_client_t *cctx = ctx;
-    int w = (int) read(cctx->fd, buf, len);
-    if (w >= 0) {
-        return w;
-    }
-    if (w < 0) {
-        if (errno == EWOULDBLOCK) {
-            return MBEDTLS_ERR_SSL_WANT_READ;
-        }
-    }
-
-}
-
 int doh_client_init(doh_client_t *client, dns_stamp_t *dns_stamp, send_reply_fn send, void *arg) {
     memset(client, 0, sizeof(*client));
     client->fd = -1;
@@ -69,9 +41,9 @@ void doh_client_connect(doh_client_t *client) {
         }
     }
 
-    mbedtls_ssl_setup(&client->ssl, &client->conf);
-    mbedtls_ssl_set_hostname(&client->ssl, "1.1.1.1");
-    mbedtls_ssl_set_bio(&client->ssl, client, doh_client_send_impl, doh_client_recv_impl, NULL);
+    set_tcp_nodelay(client->fd);
+
+    doh_tls_connect(client);
 }
 
 void doh_client_reset_session(doh_client_t *client) {

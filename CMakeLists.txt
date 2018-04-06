@@ -3,6 +3,8 @@ project(dns_over_https_client C)
 
 set(CMAKE_C_STANDARD 11)
 
+find_package(Threads)
+
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 #set(CMAKE_C_FLAGS -flto -ffat-lto-objects -fvisibility=hidden)
 
@@ -30,6 +32,6 @@ add_executable(dns_over_https_client
         logger.c
         logger.h http2.c http2.h tls.c tls.h request.c request.h util.c util.h stamp.c stamp.h)
 
-target_link_libraries(dns_over_https_client mbedtls nghttp2_static)
+target_link_libraries(dns_over_https_client mbedtls nghttp2_static ${CMAKE_THREAD_LIBS_INIT})
 #target_compile_options(dns_over_https_client PRIVATE -flto -ffat-lto-objects -fvisibility=hidden)
 #set_property(TARGET dns_over_https_client PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
