@@ -34,7 +34,7 @@ typedef struct {
 } doh_client_t;
 
 int doh_client_init(doh_client_t *client, dns_stamp_t *dns_stamp, send_reply_fn send, void *arg);
-void doh_client_connect(doh_client_t *client);
+int doh_client_connect(doh_client_t *client);
 void doh_client_reset_session(doh_client_t *client);
 void doh_client_deinit(doh_client_t *cctx);
 

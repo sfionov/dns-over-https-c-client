@@ -42,8 +42,10 @@ ssize_t raw_send(void *arg, const void *msg, size_t msglen, const struct sockadd
 void process_request(doh_request_t *req) {
     if (req->parent->fd == -1) {
         req->parent->deferred_req = req;
-        loginfo("Connecting to remote server");
-        doh_client_connect(req->parent);
+        if (doh_client_connect(req->parent) != 0) {
+            doh_request_send_reject(req);
+            doh_request_free(req);
+        }
         return;
     }
 

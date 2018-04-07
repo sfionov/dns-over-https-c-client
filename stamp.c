@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include "stamp.h"
 #include "logger.h"
+#include "util.h"
 
 static const char *const SDNS_SCHEME = "sdns://";
 
@@ -52,6 +53,31 @@ void print_cert_pins(struct iovec *pins, size_t count) {
     }
 }
 
+int parse_addr(const char *src, size_t src_len, char **p_addr, char **p_port) {
+    char *csrc = strndup(src, src_len);
+    if (csrc[0] == '[') {
+        char *end = strstr(csrc, "]");
+        if (!end) {
+            loginfo("Invalid IPv6 address (forgot brackets?)");
+            free(csrc);
+            return -1;
+        }
+        if (end[1] == ':') {
+            *p_port = strdup(end + 2);
+        } else if (end[1] != '\0') {
+            loginfo("Address is not in format [IPv6 address]:port");
+            free(csrc);
+        }
+        *p_addr = strndup(csrc + 1, end - csrc);
+    } else {
+        char *end = strstr(csrc, ":");
+        if (end != NULL) {
+            *p_port = strdup(end + 1);
+        }
+        *p_addr = strndup(csrc, end - csrc);
+    }
+    free(csrc);
+}
 
 size_t base64uri_to_base64(char *dst, size_t dst_len, const char *src) {
     const char *s = src;
@@ -120,7 +146,7 @@ int dns_stamp_parse(const char *stamp, dns_stamp_t **p_stamp) {
         loginfo("Can't parse DNS stamp: truncated stamp");
         goto error;
     }
-    dns_stamp->addr = strndup((const char *) stamp_bytes_pos, addr_len);
+    parse_addr((const char *) stamp_bytes_pos, addr_len, &dns_stamp->addr, &dns_stamp->port);
     stamp_bytes_pos += addr_len;
 
     int has_next = 0;
@@ -173,6 +199,7 @@ int dns_stamp_parse(const char *stamp, dns_stamp_t **p_stamp) {
     loginfo("Server info taken from DNS stamp:");
     print_flags(dns_stamp->flags);
     loginfo("Server address: %s", dns_stamp->addr);
+    loginfo("Server port: %s", dns_stamp->port ? dns_stamp->port : "not specified (using " DEFAULT_HTTPS_PORT ")");
     print_cert_pins(dns_stamp->cert_pins, dns_stamp->cert_pin_count);
     loginfo("Path: %s", dns_stamp->path);
     loginfo("Host: %s", dns_stamp->hostname);
@@ -188,6 +215,7 @@ error:
 void dns_stamp_free(dns_stamp_t *stamp) {
     if (stamp) {
         free(stamp->addr);
+        free(stamp->port);
         for (size_t i = 0; i < stamp->cert_pin_count; i++) {
             free(stamp->cert_pins[i].iov_base);
         }

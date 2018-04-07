@@ -16,6 +16,7 @@
 typedef struct {
     uint64_t flags;
     char *addr;
+    char *port;
     struct iovec cert_pins[DNS_STAMP_MAX_CERT_PINS];
     size_t cert_pin_count;
     char *hostname;
