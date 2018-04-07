@@ -16,21 +16,21 @@ static const char *const SDNS_SCHEME = "sdns://";
 
 static void print_flags(uint64_t flags) {
     if (flags & DNS_STAMP_FLAGS_SUPPORTS_DNSSEC) {
-        loginfo("Server supports DNSSEC");
+        loginfo("    Server supports DNSSEC");
     } else {
-        loginfo("Server doesn't support DNSSEC");
+        loginfo("    Server doesn't support DNSSEC");
     }
 
     if (flags & DNS_STAMP_FLAGS_NO_LOGGING) {
-        loginfo("Server doesn't log requests");
+        loginfo("    Server doesn't log requests");
     } else {
-        loginfo("Server may log requests");
+        loginfo("    Server may log requests");
     }
 
     if (flags & DNS_STAMP_FLAGS_NO_BLOCKING) {
-        loginfo("Server doesn't block requests");
+        loginfo("    Server doesn't block requests");
     } else {
-        loginfo("Server may block requests");
+        loginfo("    Server may block requests");
     }
 }
 
@@ -49,7 +49,7 @@ void print_cert_pins(struct iovec *pins, size_t count) {
             pos += 2;
         }
         pin[pos] = 0;
-        loginfo("Cert pin: %s", pin);
+        loginfo("    Cert pin: %s", pin);
     }
 }
 
@@ -196,13 +196,13 @@ int dns_stamp_parse(const char *stamp, dns_stamp_t **p_stamp) {
     stamp_bytes_pos += path_len;
     (void)stamp_bytes_pos;
 
-    loginfo("Server info taken from DNS stamp:");
+    loginfo("Configuration for remote DNS-over-HTTPS server (provided in sdns:// url, may differ from actual server options):");
     print_flags(dns_stamp->flags);
-    loginfo("Server address: %s", dns_stamp->addr);
-    loginfo("Server port: %s", dns_stamp->port ? dns_stamp->port : "not specified (using " DEFAULT_HTTPS_PORT ")");
+    loginfo("    Address: %s", dns_stamp->addr);
+    loginfo("    Port: %s", dns_stamp->port ? dns_stamp->port : "not specified (using " DEFAULT_HTTPS_PORT ")");
     print_cert_pins(dns_stamp->cert_pins, dns_stamp->cert_pin_count);
-    loginfo("Path: %s", dns_stamp->path);
-    loginfo("Host: %s", dns_stamp->hostname);
+    loginfo("    Path: %s", dns_stamp->path);
+    loginfo("    Host: %s", dns_stamp->hostname);
 
     *p_stamp = dns_stamp;
     return 0;

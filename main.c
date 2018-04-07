@@ -29,7 +29,7 @@ dns_stamp_t *dns_stamp;
 
 #define DEFAULT_LISTEN_ADDRESS "::"
 #define DEFAULT_LISTEN_PORT "5353"
-#define DEFAULT_SDNS_URI "sdns://AgcAAAAAAAAABzEuMC4wLjEg63Ul-I8NlFj4GplQGb_TTLiczclX57DvMV8Q-JdjgRgSZG5zLmNsb3VkZmxhcmUuY29tCi9kbnMtcXVlcnk"
+#define DEFAULT_SDNS_URI "sdns://AgcAAAAAAAAABzEuMC4wLjGgENk8mGSlIfMGXMOlIlCcKvq7AVgcrZxtjon911-ep0cg63Ul-I8NlFj4GplQGb_TTLiczclX57DvMV8Q-JdjgRgSZG5zLmNsb3VkZmxhcmUuY29tCi9kbnMtcXVlcnk"
 
 char *opt_listen_address = NULL;
 void *opt_listen_port;
