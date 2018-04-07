@@ -7,12 +7,17 @@
 
 #define DNS_STAMP_FLAGS_SUPPORTS_DNSSEC 1
 #define DNS_STAMP_FLAGS_NO_LOGGING      2
-#define DNS_STAMP_FLAGS_NO_FILTERING    4
+#define DNS_STAMP_FLAGS_NO_BLOCKING    4
+
+#define DNS_STAMP_MAX_CERT_PINS 32
+
+#include <sys/uio.h>
 
 typedef struct {
     uint64_t flags;
     char *addr;
-    char *hash0;
+    struct iovec cert_pins[DNS_STAMP_MAX_CERT_PINS];
+    size_t cert_pin_count;
     char *hostname;
     char *path;
 } dns_stamp_t;

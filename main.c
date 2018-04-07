@@ -56,30 +56,35 @@ void process_request(doh_request_t *req) {
     doh_request_submit(req);
 }
 
-void init_listen_socket(int *p_server_fd, struct addrinfo *listen_addr) {
+int init_listen_socket(int *p_server_fd, struct addrinfo *listen_addr) {
     int server_fd = socket(listen_addr->ai_family, SOCK_DGRAM, IPPROTO_UDP);
     if (server_fd == -1) {
-        fatal("Error creating server fd");
+        loginfo("Error creating server fd");
+        return -1;
     }
 
     if (set_reuse_addr(server_fd) < 0) {
-        fatal("Error setting reuseaddr flag on server socket");
+        loginfo("Error setting reuseaddr flag on server socket");
+        return -1;
     }
 
     if (set_reuse_port(server_fd) < 0) {
-        fatal("Error setting reuseport flag on server socket");
+        loginfo("Error setting reuseport flag on server socket");
+        return -1;
     }
 
     if (bind(server_fd, listen_addr->ai_addr, listen_addr->ai_addrlen) != 0) {
         loginfo("Can't bind server socket: %s", strerror(errno));
+        return -1;
     }
 
     if (make_non_blocking(server_fd) < 0) {
-        fatal("Error making server socket non-blocking");
+        loginfo("Error making server socket non-blocking");
+        return -1;
     }
 
-
     *p_server_fd = server_fd;
+    return 0;
 }
 
 doh_request_t *read_request(int server_fd, doh_client_t *client) {
@@ -94,10 +99,13 @@ doh_request_t *read_request(int server_fd, doh_client_t *client) {
 }
 
 void *do_work(void *arg) {
+    (void)arg;
     doh_client_t client;
     int server_fd;
 
-    init_listen_socket(&server_fd, listen_addr);
+    if (init_listen_socket(&server_fd, listen_addr) < 0) {
+        return NULL;
+    }
     if (doh_client_init(&client, dns_stamp, raw_send, &server_fd) == -1) {
         loginfo("Error initializing DNS over HTTPS client");
         return NULL;
@@ -145,6 +153,7 @@ void usage() {
     fprintf(stderr, "Usage: ./dns-over-https-client <listen port> <sdns:// stamp>\n");
     fprintf(stderr, "   or: ./dns-over-https-client <listen host> <listen port> <sdns:// stamp>\n");
     fprintf(stderr, "       default listen host is `::'\n");
+    fprintf(stderr, "Example: ./dns_over_https_client 53 sdns://AgcAAAAAAAAABzEuMC4wLjEg63Ul-I8NlFj4GplQGb_TTLiczclX57DvMV8Q-JdjgRgSZG5zLmNsb3VkZmxhcmUuY29tCi9kbnMtcXVlcnk");
 }
 
 struct addrinfo *get_listen_addr(const char *host, const char *serv) {
