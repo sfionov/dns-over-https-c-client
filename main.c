@@ -1,30 +1,22 @@
 #include <stdio.h>
-#include <stdarg.h>
 #include <unistd.h>
-#include <fcntl.h>
-#include <sys/select.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <stdlib.h>
 #include <netdb.h>
-#include <sys/time.h>
-#include <time.h>
 #include <string.h>
 #include <poll.h>
 #include <errno.h>
 #include <nghttp2/nghttp2.h>
-#include <mbedtls/debug.h>
 #include <signal.h>
-#include <syscall.h>
 #include <pthread.h>
-#include "dns.h"
+#include <getopt.h>
 #include "client.h"
 #include "logger.h"
 #include "http2.h"
 #include "request.h"
 #include "util.h"
 #include "tls.h"
-#include "stamp.h"
 
 static const int MAXD_GRAM_SIZE = 65535;
 
@@ -34,6 +26,14 @@ int stopping = 0;
 
 struct addrinfo *listen_addr;
 dns_stamp_t *dns_stamp;
+
+#define DEFAULT_LISTEN_ADDRESS "::"
+#define DEFAULT_LISTEN_PORT "5353"
+#define DEFAULT_SDNS_URI "sdns://AgcAAAAAAAAABzEuMC4wLjEg63Ul-I8NlFj4GplQGb_TTLiczclX57DvMV8Q-JdjgRgSZG5zLmNsb3VkZmxhcmUuY29tCi9kbnMtcXVlcnk"
+
+char *opt_listen_address = NULL;
+void *opt_listen_port;
+char *opt_sdns_uri = NULL;
 
 ssize_t raw_send(void *arg, const void *msg, size_t msglen, const struct sockaddr *sa, socklen_t salen) {
     return sendto(*(int *)arg, msg, msglen, 0, sa, salen);
@@ -150,10 +150,10 @@ void *do_work(void *arg) {
 void usage() {
     fprintf(stderr, "DNS over HTTPS client\n");
     fprintf(stderr, "Only HTTP/2+POST+udp-wireformat supported\n");
-    fprintf(stderr, "Usage: ./dns-over-https-client <listen port> <sdns:// stamp>\n");
-    fprintf(stderr, "   or: ./dns-over-https-client <listen host> <listen port> <sdns:// stamp>\n");
+    fprintf(stderr, "Usage: ./dns-over-https-client -p listen-port [-h listen-host] [-u sdns://uri]\n");
     fprintf(stderr, "       default listen host is `::'\n");
-    fprintf(stderr, "Example: ./dns_over_https_client 53 sdns://AgcAAAAAAAAABzEuMC4wLjEg63Ul-I8NlFj4GplQGb_TTLiczclX57DvMV8Q-JdjgRgSZG5zLmNsb3VkZmxhcmUuY29tCi9kbnMtcXVlcnk");
+    fprintf(stderr, "       default sdns uri is: sdns://AgcAAAAAAAAABzEuMC4wLjEg63Ul-I8NlFj4GplQGb_TTLiczclX57DvMV8Q-JdjgRgSZG5zLmNsb3VkZmxhcmUuY29tCi9kbnMtcXVlcnk\n");
+    fprintf(stderr, "       port option is required");
 }
 
 struct addrinfo *get_listen_addr(const char *host, const char *serv) {
@@ -171,28 +171,38 @@ struct addrinfo *get_listen_addr(const char *host, const char *serv) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc < 3 || argc > 4) {
+    int c;
+    while ((c = getopt (argc, argv, "h:p:u:")) != -1) {
+        switch (c) {
+            case 'h':
+                opt_listen_address = strdup(optarg);
+                break;
+            case 'p':
+                opt_listen_port = strdup(optarg);
+                break;
+            case 'u':
+                opt_sdns_uri = strdup(optarg);
+                break;
+            default:
+            case '?':
+                usage();
+                return 1;
+        }
+    }
+    if (opt_listen_port == 0) {
         usage();
         return 1;
     }
 
     signal(SIGPIPE, SIG_IGN);
 
-    const char *host, *serv, *stamp;
-    if (argc == 4) {
-        host = argv[1];
-        serv = argv[2];
-        stamp = argv[3];
-    } else {
-        host = "::";
-        serv = argv[1];
-        stamp = argv[2];
-    }
-    listen_addr = get_listen_addr(host, serv);
+    listen_addr = get_listen_addr(opt_listen_address ? opt_listen_address : DEFAULT_LISTEN_ADDRESS,
+                                  opt_listen_port ? opt_listen_port : DEFAULT_LISTEN_PORT);
     if (listen_addr == 0) {
         fatal("Can't resolve listen host");
     }
-    if (dns_stamp_parse(stamp, &dns_stamp) < 0) {
+    if (dns_stamp_parse(opt_sdns_uri ? opt_sdns_uri : DEFAULT_SDNS_URI,
+                        &dns_stamp) < 0) {
         fatal("Can't parse DNS stamp");
     }
 
@@ -211,6 +221,10 @@ int main(int argc, char *argv[]) {
     }
 
     freeaddrinfo(listen_addr);
+    dns_stamp_free(dns_stamp);
+    free(opt_listen_address);
+    free(opt_listen_port);
+    free(opt_sdns_uri);
 
     return 0;
 }
