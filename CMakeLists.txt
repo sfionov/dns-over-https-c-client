@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.9)
-project(dns_over_https_client C)
+project(doh_c_client C)
 
 set(CMAKE_C_STANDARD 11)
 
@@ -15,7 +15,7 @@ set(CMAKE_INSTALL_LIBDIR ${CMAKE_CURRENT_BINARY_DIR})
 add_subdirectory(third-party/nghttp2-1.31.0/lib)
 target_compile_definitions(nghttp2_static PUBLIC HAVE_ARPA_INET_H=1 HAVE_NETINET_IN_H=1)
 
-add_executable(dns_over_https_client
+add_executable(doh_c_client
         main.c
         dns.h
         client.c client.h
@@ -26,4 +26,4 @@ add_executable(dns_over_https_client
         util.c util.h
         stamp.c stamp.h)
 
-target_link_libraries(dns_over_https_client mbedtls nghttp2_static ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(doh_c_client mbedtls nghttp2_static ${CMAKE_THREAD_LIBS_INIT})
