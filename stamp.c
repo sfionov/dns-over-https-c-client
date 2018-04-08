@@ -1,13 +1,9 @@
-//
-// Created by s.fionov on 05.04.18.
-//
-
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include <mbedtls/base64.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdio.h>
+
 #include "stamp.h"
 #include "logger.h"
 #include "util.h"
@@ -36,20 +32,8 @@ static void print_flags(uint64_t flags) {
 
 void print_cert_pins(struct iovec *pins, size_t count) {
     for (size_t i = 0; i < count; i++) {
-        char pin[256 * 3 + 1];
-        int pos = 0;
-        for (size_t j = 0; j < pins[i].iov_len && pos < sizeof(pin) - 4; j++) {
-            char hex[3];
-            snprintf(hex, 3, "%02x", ((const uint8_t *)pins[i].iov_base)[j]);
-            if (j != 0) {
-                pin[pos] = ':';
-                pos++;
-            }
-            memcpy(pin + pos, hex, 2);
-            pos += 2;
-        }
-        pin[pos] = 0;
-        loginfo("    Cert pin: %s", pin);
+        char hex[pins[i].iov_len * 3 + 1];
+        loginfo("    Cert pin: %s", hex_string(hex, sizeof(hex), pins[i].iov_base, pins[i].iov_len));
     }
 }
 

@@ -1,18 +1,13 @@
-//
-// Created by s.fionov on 05.04.18.
-//
+#include <unistd.h>
+#include <string.h>
+#include <stdio.h>
+#include <errno.h>
+#include <sys/poll.h>
 
 #include "http2.h"
 #include "logger.h"
 #include "client.h"
 #include "request.h"
-
-#include <unistd.h>
-#include <string.h>
-#include <nghttp2/nghttp2.h>
-#include <stdio.h>
-#include <errno.h>
-#include <sys/poll.h>
 
 #define HTTP2_MAX_FIELDS_NUM 20
 #define PH_STATUS ":status"

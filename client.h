@@ -20,10 +20,12 @@ typedef struct doh_request doh_request_t;
 typedef struct {
     int fd;
     int ssl_connected;
+    int ssl_pin_verified;
     mbedtls_ssl_context ssl;
     mbedtls_entropy_context entropy;
     mbedtls_ctr_drbg_context ctr_drbg;
     mbedtls_ssl_config conf;
+    mbedtls_x509_crt crt;
     short events;
     nghttp2_session *session;
     doh_request_t *deferred_req;

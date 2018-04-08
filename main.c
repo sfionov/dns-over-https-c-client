@@ -11,6 +11,7 @@
 #include <signal.h>
 #include <pthread.h>
 #include <getopt.h>
+
 #include "client.h"
 #include "logger.h"
 #include "http2.h"
@@ -21,19 +22,19 @@
 static const int MAXD_GRAM_SIZE = 65535;
 
 #define PH_STATUS ":status"
+#define DEFAULT_LISTEN_ADDRESS "::"
+#define DEFAULT_SDNS_URI "sdns://AgcAAAAAAAAABzEuMC4wLjGgENk8mGSlIfMGXMOlIlCcKvq7AVgcrZxtjon911-ep0cg63Ul-I8NlFj4GplQGb_TTLiczclX57DvMV8Q-JdjgRgSZG5zLmNsb3VkZmxhcmUuY29tCi9kbnMtcXVlcnk"
 
+// Global state
 int stopping = 0;
-
 struct addrinfo *listen_addr;
 dns_stamp_t *dns_stamp;
 
-#define DEFAULT_LISTEN_ADDRESS "::"
-#define DEFAULT_LISTEN_PORT "5353"
-#define DEFAULT_SDNS_URI "sdns://AgcAAAAAAAAABzEuMC4wLjGgENk8mGSlIfMGXMOlIlCcKvq7AVgcrZxtjon911-ep0cg63Ul-I8NlFj4GplQGb_TTLiczclX57DvMV8Q-JdjgRgSZG5zLmNsb3VkZmxhcmUuY29tCi9kbnMtcXVlcnk"
-
+// Getopt options
 char *opt_listen_address = NULL;
 void *opt_listen_port;
 char *opt_sdns_uri = NULL;
+int opt_threads = 1;
 
 ssize_t raw_send(void *arg, const void *msg, size_t msglen, const struct sockaddr *sa, socklen_t salen) {
     return sendto(*(int *)arg, msg, msglen, 0, sa, salen);
@@ -149,13 +150,18 @@ void *do_work(void *arg) {
     return NULL;
 }
 
+#define usage_line(x) fprintf(stderr, x "\n");
+
 void usage() {
-    fprintf(stderr, "DNS over HTTPS client\n");
-    fprintf(stderr, "Only HTTP/2+POST+udp-wireformat supported\n");
-    fprintf(stderr, "Usage: ./dns-over-https-client -p listen-port [-h listen-host] [-u sdns://uri]\n");
-    fprintf(stderr, "       default listen host is `::'\n");
-    fprintf(stderr, "       default sdns uri is: sdns://AgcAAAAAAAAABzEuMC4wLjEg63Ul-I8NlFj4GplQGb_TTLiczclX57DvMV8Q-JdjgRgSZG5zLmNsb3VkZmxhcmUuY29tCi9kbnMtcXVlcnk\n");
-    fprintf(stderr, "       port option is required");
+    usage_line("DNS over HTTPS client\n");
+    usage_line("Only HTTP/2+POST+udp-wireformat supported");
+    usage_line("Usage: ./dns-over-https-client -p listen-port [-h listen-host] [-t threads] [-u sdns://uri]");
+    usage_line("       -p <listen port>    -- Listen port (required parameter)");
+    usage_line("       -h <listen host>    -- Listen host. Default value is `::'");
+    usage_line("       -t <threads>        -- Worker thread count. Default value is 1, and this should be enough is most cases.");
+    usage_line("       -u <sdns uri>       -- SDNS stamp URI of DNS-over-HTTPS server.");
+    usage_line("                              Default value is SDNS for 1.0.0.1: ");
+    usage_line("                              " DEFAULT_SDNS_URI);
 }
 
 struct addrinfo *get_listen_addr(const char *host, const char *serv) {
@@ -174,7 +180,7 @@ struct addrinfo *get_listen_addr(const char *host, const char *serv) {
 
 int main(int argc, char *argv[]) {
     int c;
-    while ((c = getopt (argc, argv, "h:p:u:")) != -1) {
+    while ((c = getopt (argc, argv, "h:p:u:t:")) != -1) {
         switch (c) {
             case 'h':
                 opt_listen_address = strdup(optarg);
@@ -185,6 +191,13 @@ int main(int argc, char *argv[]) {
             case 'u':
                 opt_sdns_uri = strdup(optarg);
                 break;
+            case 't':
+                opt_threads = (int) strtol(optarg, NULL, 0);
+                if (opt_threads > 64) {
+                    goto fail;
+                }
+                break;
+            fail:
             default:
             case '?':
                 usage();
@@ -199,7 +212,7 @@ int main(int argc, char *argv[]) {
     signal(SIGPIPE, SIG_IGN);
 
     listen_addr = get_listen_addr(opt_listen_address ? opt_listen_address : DEFAULT_LISTEN_ADDRESS,
-                                  opt_listen_port ? opt_listen_port : DEFAULT_LISTEN_PORT);
+                                  opt_listen_port);
     if (listen_addr == 0) {
         fatal("Can't resolve listen host");
     }
@@ -208,15 +221,14 @@ int main(int argc, char *argv[]) {
         fatal("Can't parse DNS stamp");
     }
 
-    int threads = 1;
-    loginfo("Spawning %d workers", threads);
+    loginfo("Spawning %d workers", opt_threads);
     int thread_idx;
-    for (thread_idx = 0; thread_idx < threads - 1; thread_idx++) {
+    for (thread_idx = 0; thread_idx < opt_threads - 1; thread_idx++) {
         pthread_t thr;
         pthread_create(&thr, NULL, do_work, NULL);
         pthread_detach(thr);
     }
-    if (thread_idx < threads) {
+    if (thread_idx < opt_threads) {
         do_work(NULL);
     } else {
         loginfo("Nothing to do, exiting");

@@ -1,6 +1,8 @@
-//
-// Created by s.fionov on 02.04.18.
-//
+#include <unistd.h>
+#include <sys/poll.h>
+#include <errno.h>
+#include <memory.h>
+#include <netdb.h>
 
 #include "client.h"
 #include "http2.h"
@@ -9,16 +11,10 @@
 #include "logger.h"
 #include "util.h"
 #include "stamp.h"
-#include <unistd.h>
-#include <sys/poll.h>
-#include <errno.h>
-#include <memory.h>
-#include <netdb.h>
 
 int doh_client_init(doh_client_t *client, dns_stamp_t *dns_stamp, send_reply_fn send, void *arg) {
     memset(client, 0, sizeof(*client));
     client->fd = -1;
-    client->ssl_connected = 0;
     client->session = NULL;
     client->events = POLLIN;
     client->send_reply = send;
@@ -68,7 +64,6 @@ void doh_client_reset_session(doh_client_t *client) {
     }
 
     doh_tls_reset_session(client);
-    client->ssl_connected = 0;
 
     close(client->fd);
     client->fd = -1;

@@ -1,7 +1,3 @@
-//
-// Created by s.fionov on 05.04.18.
-//
-
 #ifndef DNS_OVER_HTTPS_CLIENT_REQUEST_H
 #define DNS_OVER_HTTPS_CLIENT_REQUEST_H
 

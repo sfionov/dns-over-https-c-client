@@ -1,14 +1,11 @@
-//
-// Created by s.fionov on 05.04.18.
-//
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
 
 #include "request.h"
 #include "logger.h"
 #include "http2.h"
 #include "dns.h"
-#include <unistd.h>
-#include <errno.h>
-#include <string.h>
 
 doh_request_t *doh_request_create(doh_client_t *client, char *msg, size_t len, struct sockaddr_storage *sa, socklen_t salen) {
     doh_request_t *req = calloc(1, sizeof(doh_request_t));

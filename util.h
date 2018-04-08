@@ -1,7 +1,3 @@
-//
-// Created by s.fionov on 05.04.18.
-//
-
 #ifndef DNS_OVER_HTTPS_CLIENT_UTIL_H
 #define DNS_OVER_HTTPS_CLIENT_UTIL_H
 
@@ -16,5 +12,7 @@ int set_reuse_port(int fd);
 int set_tcp_nodelay(int fd);
 
 void fatal(const char *msg);
+
+const char *hex_string(char *hex, size_t hex_len, void *src, size_t src_len);
 
 #endif //DNS_OVER_HTTPS_CLIENT_UTIL_H
