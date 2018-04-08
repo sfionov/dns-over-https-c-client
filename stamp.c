@@ -180,7 +180,7 @@ int dns_stamp_parse(const char *stamp, dns_stamp_t **p_stamp) {
     stamp_bytes_pos += path_len;
     (void)stamp_bytes_pos;
 
-    loginfo("Configuration for remote DNS-over-HTTPS server (provided in sdns:// url, may differ from actual server options):");
+    loginfo("Configuration for remote DNS-over-HTTPS server (provided in sdns:// uri, may differ from actual server options):");
     print_flags(dns_stamp->flags);
     loginfo("    Address: %s", dns_stamp->addr);
     loginfo("    Port: %s", dns_stamp->port ? dns_stamp->port : "not specified (using " DEFAULT_HTTPS_PORT ")");

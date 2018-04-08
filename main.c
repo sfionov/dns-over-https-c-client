@@ -31,9 +31,9 @@ struct addrinfo *listen_addr;
 dns_stamp_t *dns_stamp;
 
 // Getopt options
-char *opt_listen_address = NULL;
+char *opt_listen_address = DEFAULT_LISTEN_ADDRESS;
 void *opt_listen_port;
-char *opt_sdns_uri = NULL;
+char *opt_sdns_uri = DEFAULT_SDNS_URI;
 int opt_threads = 1;
 
 ssize_t raw_send(void *arg, const void *msg, size_t msglen, const struct sockaddr *sa, socklen_t salen) {
@@ -114,7 +114,7 @@ void *do_work(void *arg) {
         return NULL;
     }
 
-    loginfo("Server started");
+    loginfo("Listening for DNS requests on port %s", opt_listen_port);
     while (!stopping) {
         struct pollfd pfd[2];
         nfds_t pfdlen = 0;
@@ -153,12 +153,13 @@ void *do_work(void *arg) {
 #define usage_line(x) fprintf(stderr, x "\n");
 
 void usage() {
-    usage_line("DNS over HTTPS client\n");
+    usage_line("DNS over HTTPS client");
+    usage_line("");
     usage_line("Only HTTP/2+POST+udp-wireformat supported");
     usage_line("Usage: ./doh_client -p listen-port [-h listen-host] [-t threads] [-u sdns://uri]");
-    usage_line("       -p <listen port>    -- Listen port (required parameter)");
+    usage_line("       -p <listen port>    -- Listen port for plain DNS requests (required parameter)");
     usage_line("       -h <listen host>    -- Listen host. Default value is `::'");
-    usage_line("       -t <threads>        -- Worker thread count. Default value is 1, and this should be enough is most cases.");
+    usage_line("       -t <threads>        -- Worker thread count. Default value is 1, and this should be enough in most cases.");
     usage_line("       -u <sdns uri>       -- SDNS stamp URI of DNS-over-HTTPS server.");
     usage_line("                              Default value is SDNS for 1.0.0.1: ");
     usage_line("                              " DEFAULT_SDNS_URI);
@@ -183,13 +184,13 @@ int main(int argc, char *argv[]) {
     while ((c = getopt (argc, argv, "h:p:u:t:")) != -1) {
         switch (c) {
             case 'h':
-                opt_listen_address = strdup(optarg);
+                opt_listen_address = optarg;
                 break;
             case 'p':
-                opt_listen_port = strdup(optarg);
+                opt_listen_port = optarg;
                 break;
             case 'u':
-                opt_sdns_uri = strdup(optarg);
+                opt_sdns_uri = optarg;
                 break;
             case 't':
                 opt_threads = (int) strtol(optarg, NULL, 0);
@@ -211,13 +212,13 @@ int main(int argc, char *argv[]) {
 
     signal(SIGPIPE, SIG_IGN);
 
-    listen_addr = get_listen_addr(opt_listen_address ? opt_listen_address : DEFAULT_LISTEN_ADDRESS,
-                                  opt_listen_port);
+    listen_addr = get_listen_addr(opt_listen_address, opt_listen_port);
     if (listen_addr == 0) {
         fatal("Can't resolve listen host");
     }
-    if (dns_stamp_parse(opt_sdns_uri ? opt_sdns_uri : DEFAULT_SDNS_URI,
-                        &dns_stamp) < 0) {
+
+    loginfo("Using sdns uri: %s", opt_sdns_uri);
+    if (dns_stamp_parse(opt_sdns_uri, &dns_stamp) < 0) {
         fatal("Can't parse DNS stamp");
     }
 
@@ -236,9 +237,6 @@ int main(int argc, char *argv[]) {
 
     freeaddrinfo(listen_addr);
     dns_stamp_free(dns_stamp);
-    free(opt_listen_address);
-    free(opt_listen_port);
-    free(opt_sdns_uri);
 
     return 0;
 }
