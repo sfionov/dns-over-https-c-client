@@ -4,6 +4,10 @@ DNS over HTTPS client written in C
 ### Goal
 Make an alternative to `dnscrypt-proxy` and `cloudflared` written in C.
 
+### Compiling
+
+To compile, run `cmake` and `make doh_c_client`.
+
 ### Usage
 
 ```
@@ -25,7 +29,3 @@ List on encrypted DNS server may be found in `dnscrypt-proxy` project:
 https://github.com/DNSCrypt/dnscrypt-resolvers/blob/master/v2/public-resolvers.md
 
 sdns:// links starting with "Ag" is probably DNS over HTTPS (HTTP/2).
-
-### Compiling
-
-To compile, run `cmake` and `make doh_c_client`.
