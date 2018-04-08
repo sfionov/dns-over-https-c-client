@@ -155,7 +155,7 @@ void *do_work(void *arg) {
 void usage() {
     usage_line("DNS over HTTPS client\n");
     usage_line("Only HTTP/2+POST+udp-wireformat supported");
-    usage_line("Usage: ./dns-over-https-client -p listen-port [-h listen-host] [-t threads] [-u sdns://uri]");
+    usage_line("Usage: ./doh_client -p listen-port [-h listen-host] [-t threads] [-u sdns://uri]");
     usage_line("       -p <listen port>    -- Listen port (required parameter)");
     usage_line("       -h <listen host>    -- Listen host. Default value is `::'");
     usage_line("       -t <threads>        -- Worker thread count. Default value is 1, and this should be enough is most cases.");
