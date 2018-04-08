@@ -222,7 +222,9 @@ int main(int argc, char *argv[]) {
         fatal("Can't parse DNS stamp");
     }
 
-    loginfo("Spawning %d workers", opt_threads);
+    if (opt_threads != 1) {
+        loginfo("Spawning %d workers", opt_threads);
+    }
     int thread_idx;
     for (thread_idx = 0; thread_idx < opt_threads - 1; thread_idx++) {
         pthread_t thr;
