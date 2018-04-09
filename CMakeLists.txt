@@ -14,6 +14,7 @@ set(HAVE_CUNIT ON)
 set(CMAKE_INSTALL_LIBDIR ${CMAKE_CURRENT_BINARY_DIR})
 add_subdirectory(third-party/nghttp2-1.31.0/lib)
 target_compile_definitions(nghttp2_static PUBLIC HAVE_ARPA_INET_H=1 HAVE_NETINET_IN_H=1)
+target_include_directories(nghttp2_static PUBLIC ${CMAKE_SOURCE_DIR}/third-party/nghttp2-1.31.0/lib/includes)
 
 add_executable(doh_client
         main.c
