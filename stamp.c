@@ -99,7 +99,8 @@ int dns_stamp_parse(const char *stamp, dns_stamp_t **p_stamp) {
     size_t stamp_base64_len = base64uri_to_base64(stamp_base64, sizeof(stamp_base64), stamp);
     uint8_t stamp_bytes[stamp_base64_len / 4 * 3 + 1];
     size_t stamp_bytes_len;
-    if (mbedtls_base64_decode(stamp_bytes, sizeof(stamp_bytes), &stamp_bytes_len, stamp_base64, stamp_base64_len) < 0) {
+    if (mbedtls_base64_decode(stamp_bytes, sizeof(stamp_bytes), &stamp_bytes_len,
+                              (const unsigned char *)stamp_base64, stamp_base64_len) < 0) {
         loginfo("Can't parse DNS stamp: invalid base64");
         return -1;
     }
