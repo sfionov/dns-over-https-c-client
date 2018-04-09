@@ -9,9 +9,27 @@
 
 #include "logger.h"
 
-intmax_t gettid() {
+#if defined(__linux__)
+intmax_t gettid(void) {
     return syscall(SYS_gettid);
 }
+#elif defined(__FreeBSD__)
+#include <pthread_np.h>
+intmax_t gettid(void) {
+    return pthread_getthreadid_np();
+}
+#elif defined(__MACH__)
+#include <pthread.h>
+intmax_t gettid(void) {
+    uint64_t ktid = 0;
+    pthread_threadid_np(NULL, &ktid);
+    return ktid;
+}
+#else
+intmax_t gettid(void) {
+    return -1;
+}
+#endif
 
 void loginfo(const char *format, ...) {
     va_list args;
