@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/poll.h>
+#include <sys/time.h>
 #include <errno.h>
 #include <mbedtls/entropy.h>
 #include <mbedtls/ctr_drbg.h>
@@ -67,12 +68,10 @@ int doh_tls_init(doh_client_t *client) {
     // Init entropy
     mbedtls_entropy_init(&client->entropy);
     // Time as seed
-    struct timespec ts = {time(0), 0};
-    // Nanoseconds as seed
-    timespec_get(&ts, TIME_UTC);
+    struct timeval tv = {0};
+    gettimeofday(&tv, NULL);
     // Init seed
-    const char *seed = "fjklsdjf";
-    if ((ret = mbedtls_ctr_drbg_seed(&client->ctr_drbg, mbedtls_entropy_func, &client->entropy, seed, strlen(seed))) != 0) {
+    if ((ret = mbedtls_ctr_drbg_seed(&client->ctr_drbg, mbedtls_entropy_func, &client->entropy, (void *)&tv, sizeof(tv))) != 0) {
         loginfo("Can't initialize PRNG, error: %d\n", ret);
         return -1;
     }
