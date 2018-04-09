@@ -157,12 +157,10 @@ static int doh_tls_send_impl(void *ctx, const unsigned char *buf, size_t len) {
     if (w >= 0) {
         return w;
     }
-    if (w < 0) {
-        if (errno == EWOULDBLOCK) {
-            return MBEDTLS_ERR_SSL_WANT_WRITE;
-        }
-        return MBEDTLS_ERR_SSL_INTERNAL_ERROR;
+    if (errno == EWOULDBLOCK) {
+        return MBEDTLS_ERR_SSL_WANT_WRITE;
     }
+    return MBEDTLS_ERR_SSL_INTERNAL_ERROR;
 }
 
 static int doh_tls_recv_impl(void *ctx, unsigned char *buf, size_t len) {
@@ -171,12 +169,10 @@ static int doh_tls_recv_impl(void *ctx, unsigned char *buf, size_t len) {
     if (w >= 0) {
         return w;
     }
-    if (w < 0) {
-        if (errno == EWOULDBLOCK) {
-            return MBEDTLS_ERR_SSL_WANT_READ;
-        }
+    if (errno == EWOULDBLOCK) {
+        return MBEDTLS_ERR_SSL_WANT_READ;
     }
-
+    return MBEDTLS_ERR_SSL_INTERNAL_ERROR;
 }
 
 void doh_tls_connect(doh_client_t *client) {

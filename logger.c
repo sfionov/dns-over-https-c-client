@@ -1,6 +1,5 @@
 #include <unistd.h>
 #include <stdint.h>
-#include <syscall.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <inttypes.h>
@@ -10,6 +9,7 @@
 #include "logger.h"
 
 #if defined(__linux__)
+#include <syscall.h>
 intmax_t gettid(void) {
     return syscall(SYS_gettid);
 }

@@ -15,6 +15,7 @@
 http2_headers_t *http2_headers_create() {
     http2_headers_t *headers = calloc(1, sizeof(http2_headers_t));
     headers->nv = calloc(HTTP2_MAX_FIELDS_NUM, sizeof(nghttp2_nv));
+    return headers;
 }
 
 void http2_add_header(http2_headers_t *headers, char *name, char *valuefmt, ...) {
@@ -83,6 +84,7 @@ int http2cb_on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
             doh_request_send_reject(req);
         }
     }
+    return 0;
 }
 
 void doh_http2_reset_session(doh_client_t *client) {
@@ -100,6 +102,7 @@ int http2cb_on_stream_close(nghttp2_session *session,
     }
     doh_request_free(req);
     nghttp2_session_set_stream_user_data(session, stream_id, NULL);
+    return 0;
 }
 
 ssize_t doh_http2_recv_via_tls(nghttp2_session *session,
