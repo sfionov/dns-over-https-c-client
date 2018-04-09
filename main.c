@@ -24,7 +24,7 @@
 static const int MAXD_GRAM_SIZE = 65535;
 
 #define PH_STATUS ":status"
-#define DEFAULT_LISTEN_ADDRESS "::"
+#define DEFAULT_LISTEN_ADDRESS "localhost"
 #define DEFAULT_SDNS_URI "sdns://AgcAAAAAAAAABzEuMC4wLjGgENk8mGSlIfMGXMOlIlCcKvq7AVgcrZxtjon911-ep0cg63Ul-I8NlFj4GplQGb_TTLiczclX57DvMV8Q-JdjgRgSZG5zLmNsb3VkZmxhcmUuY29tCi9kbnMtcXVlcnk"
 
 // Global state
@@ -34,7 +34,7 @@ dns_stamp_t *dns_stamp;
 
 // Getopt options
 char *opt_listen_address = DEFAULT_LISTEN_ADDRESS;
-void *opt_listen_port;
+char *opt_listen_port;
 char *opt_sdns_uri = DEFAULT_SDNS_URI;
 int opt_threads = 1;
 
@@ -116,7 +116,14 @@ void *do_work(void *arg) {
         return NULL;
     }
 
-    loginfo("Listening for DNS requests on port %s", opt_listen_port);
+    char host[256];
+    snprintf(host, sizeof(host), "%s", opt_listen_address);
+    char serv[50];
+    snprintf(host, sizeof(host), "%s", opt_listen_port);
+    getnameinfo(listen_addr->ai_addr, listen_addr->ai_addrlen,
+                host, sizeof(host), serv, sizeof(serv),
+                NI_NUMERICHOST | NI_NUMERICSERV);
+    loginfo("Listening for DNS requests on %s port %s", host, serv);
     while (!stopping) {
         struct pollfd pfd[2];
         nfds_t pfdlen = 0;
@@ -160,7 +167,7 @@ void usage() {
     usage_line("Only HTTP/2+POST+udp-wireformat supported");
     usage_line("Usage: ./doh_client -p listen-port [-h listen-host] [-t threads] [-u sdns://uri]");
     usage_line("       -p <listen port>    -- Listen port for plain DNS requests (required parameter)");
-    usage_line("       -h <listen host>    -- Listen host. Default value is `::'");
+    usage_line("       -h <listen host>    -- Listen host. Default value is `localhost'");
     usage_line("       -t <threads>        -- Worker thread count. Default value is 1, and this should be enough in most cases.");
     usage_line("       -u <sdns uri>       -- SDNS stamp URI of DNS-over-HTTPS server.");
     usage_line("                              Default value is SDNS for 1.0.0.1: ");
