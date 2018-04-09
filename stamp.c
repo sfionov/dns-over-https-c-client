@@ -51,6 +51,7 @@ int parse_addr(const char *src, size_t src_len, char **p_addr, char **p_port) {
         } else if (end[1] != '\0') {
             loginfo("Address is not in format [IPv6 address]:port");
             free(csrc);
+            return -1;
         }
         *p_addr = strndup(csrc + 1, end - csrc);
     } else {
@@ -61,6 +62,7 @@ int parse_addr(const char *src, size_t src_len, char **p_addr, char **p_port) {
         *p_addr = strndup(csrc, end - csrc);
     }
     free(csrc);
+    return 0;
 }
 
 size_t base64uri_to_base64(char *dst, size_t dst_len, const char *src) {

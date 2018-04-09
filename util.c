@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
 #include <netinet/tcp.h>
 
 #include "util.h"
@@ -29,7 +30,7 @@ int set_reuse_port(int fd) {
 
 int set_tcp_nodelay(int fd) {
     int value = 1;
-    setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));
+    return setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));
 }
 
 void fatal(const char *msg) {
