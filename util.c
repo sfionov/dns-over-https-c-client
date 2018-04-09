@@ -29,7 +29,7 @@ int set_reuse_port(int fd) {
 
 int set_tcp_nodelay(int fd) {
     int value = 1;
-    setsockopt(fd, SOL_TCP, TCP_NODELAY, &value, sizeof(value));
+    setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));
 }
 
 void fatal(const char *msg) {
