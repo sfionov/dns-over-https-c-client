@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <stdlib.h>
 #include <netdb.h>
 #include <string.h>
@@ -98,7 +100,7 @@ doh_request_t *read_request(int server_fd, doh_client_t *client) {
     if (r < 0) {
         loginfo("recvfrom failed :(");
     }
-    doh_request_create(client, buf, r, &sa, salen);
+    return doh_request_create(client, buf, r, &sa, salen);
 }
 
 void *do_work(void *arg) {
